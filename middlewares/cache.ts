@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { redisClient } from '../db/redis';
+import { redis } from '../db/redis';
+import chalk from 'chalk';
 
 export async function cache(
 	req: Request<never, never, never, { url: string }>,
@@ -7,8 +8,11 @@ export async function cache(
 	next: any
 ) {
 	const { url } = req;
-	const result = await redisClient.get(url);
+	const result = await redis.get(url);
 
 	if (!result) return next();
+
+	console.log(chalk.yellowBright('Data was taken from cache...'));
+
 	return res.json(result);
 }

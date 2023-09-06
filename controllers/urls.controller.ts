@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import UrlsService from '../services/urls.service';
-import { redisClient } from '../db/redis';
+import { redis } from '../db/redis';
+import chalk from 'chalk';
 
 class UrlsController {
 	public static async createOrGetShortenedUrl(
@@ -10,11 +11,12 @@ class UrlsController {
 		const { url: fullUrl } = req.query;
 		const shortenedUrl = await UrlsService.createOrGetShortenedUrl(fullUrl);
 
-		const { url } = req;
-		await redisClient.setEx(url, 300, shortenedUrl);
+		console.log(chalk.yellowBright('Data was taken from DB...'));
 
-		const keys = await redisClient.keys('*');
-		console.log(keys);
+		const { url } = req;
+		await redis.setex(url, 300, shortenedUrl);
+
+		await showKeys();
 
 		return res.send(shortenedUrl);
 	}
@@ -26,13 +28,20 @@ class UrlsController {
 		const { url: shortUrl } = req.query;
 		const fullUrl = await UrlsService.getFullUrl(shortUrl);
 
-		const { url } = req;
-		await redisClient.setEx(url, 300, fullUrl);
+		console.log(chalk.yellowBright('Data was taken from DB...'));
 
-		const keys = await redisClient.keys('*');
-		console.log(keys);
+		const { url } = req;
+		await redis.setex(url, 300, fullUrl);
+
+		await showKeys();
 
 		return res.send(fullUrl);
 	}
 }
+
+async function showKeys() {
+	const keys = await redis.keys('*');
+	console.log(keys);
+}
+
 export default UrlsController;

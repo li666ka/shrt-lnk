@@ -5,7 +5,7 @@ import { Url } from '../models/url.model';
 export const sequelize = new Sequelize(dbConfig);
 
 class Db {
-	public static async initDb() {
+	public static async init() {
 		sequelize.addModels([Url]);
 		await sequelize.authenticate();
 		await sequelize.sync();
